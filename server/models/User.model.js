@@ -1,0 +1,19 @@
+CREATE TABLE users (
+  id CHAR(36) PRIMARY KEY,
+  full_name VARCHAR(100) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  phone VARCHAR(15) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+
+  role ENUM('BUYER', 'SELLER', 'ADMIN') NOT NULL DEFAULT 'BUYER',
+
+  is_verified BOOLEAN DEFAULT FALSE,
+  is_active BOOLEAN DEFAULT TRUE,
+
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX idx_role (role),
+  INDEX idx_email (email),
+  INDEX idx_phone (phone)
+);
