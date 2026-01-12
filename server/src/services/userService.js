@@ -1,10 +1,12 @@
 import User from "../models/User.js";
-import NotFoundError, {ValidationError} from
+import {NotFoundError, ValidationError} from
  "../utils/errorHandler.js";
 import logger from "../utils/logger.js";
 import sendEmail from
  "../config/email.js";
-import { USER_NOT_FOUND } from "../constants/messages.js";
+import { MESSAGES } from "../constants/messages.js";
+
+const { USER_NOT_FOUND } = MESSAGES;
 
 class UserService {
   async getUserProfile(userId) {

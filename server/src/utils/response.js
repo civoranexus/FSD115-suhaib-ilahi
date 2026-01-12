@@ -58,7 +58,7 @@ const sendPaginatedResponse = (
   });
 };
 
-export default {
+export  {
   sendSuccess,
   sendError,
   sendPaginatedResponse,

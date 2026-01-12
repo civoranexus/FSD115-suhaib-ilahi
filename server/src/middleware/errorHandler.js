@@ -1,5 +1,5 @@
 import logger from "../utils/logger.js";
-import sendError from "../utils/response.js";
+import {sendError} from "../utils/response.js";
 import { HTTP_STATUS_CODES } from "../constants/statusCodes.js";
 import { MESSAGES } from "../constants/messages.js";
 import {ApplicationError} from "../utils/errorHandler.js";
@@ -11,8 +11,8 @@ const {
   FILE_SIZE_EXCEEDED,
   FILE_UPLOAD_ERROR,
   INVALID_FILE_TYPE,
-  _INTERNAL_SERVER_ERROR,
-  _NOT_FOUND,
+  INTERNAL_SERVER_ERROR: INTERNAL_SERVER_ERROR_MSG,
+  NOT_FOUND: NOT_FOUND_MSG,
 } = MESSAGES;
 const errorHandler = (error, req, res, next) => {
   logger.error("Error occurred:", {
@@ -42,11 +42,11 @@ const errorHandler = (error, req, res, next) => {
     return sendError(res, INVALID_FILE_TYPE, BAD_REQUEST);
   }
 
-  return sendError(res, _INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR);
+  return sendError(res, INTERNAL_SERVER_ERROR_MSG, INTERNAL_SERVER_ERROR);
 };
 
 const notFoundHandler = (req, res) => {
-  sendError(res, _NOT_FOUND, NOT_FOUND);
+  sendError(res, NOT_FOUND_MSG, NOT_FOUND);
 };
 
 export { errorHandler, notFoundHandler };

@@ -1,4 +1,4 @@
-import ValidationError from "../utils/errorHandler.js";
+import {ValidationError} from "../utils/errorHandler.js";
 
 const validate = (schema, options = {}) => {
   return (req, res, next) => {
@@ -25,4 +25,4 @@ const validate = (schema, options = {}) => {
   };
 };
 
-export default { validate };
+export  { validate };

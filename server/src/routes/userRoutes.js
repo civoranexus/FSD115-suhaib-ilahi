@@ -1,7 +1,7 @@
 import { Router } from "express";
 import userController from "../controllers/userController.js";
 import { authenticate, authorize } from "../middleware/authenticate.js";
-import validate from "../middleware/validation.js";
+import {validate} from "../middleware/validation.js";
 import {
   updateProfileSchema,
   submitKYCSchema,

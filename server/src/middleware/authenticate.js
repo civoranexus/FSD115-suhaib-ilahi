@@ -1,11 +1,13 @@
-import verifyAccessToken from "../config/jwt.js";
+import {verifyAccessToken} from "../config/jwt.js";
 import {
   AuthenticationError,
   AuthorizationError,
 } from "../utils/errorHandler.js";
-import sendError from "../utils/response.js";
-import { UNAUTHORIZED, FORBIDDEN } from "../constants/statusCodes.js";
+import {sendError} from "../utils/response.js";
+import { HTTP_STATUS_CODES } from "../constants/statusCodes.js";
 import logger from "../utils/logger.js";
+
+const {UNAUTHORIZED, FORBIDDEN} =HTTP_STATUS_CODES;
 
 const authenticate = (req, res, next) => {
   try {
@@ -51,7 +53,7 @@ const authorize = (allowedRoles = []) => {
   };
 };
 
-export default {
+export  {
   authenticate,
   authorize,
 };

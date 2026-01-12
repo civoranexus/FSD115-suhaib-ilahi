@@ -43,7 +43,7 @@ const disconnectDatabase = async () => {
   }
 };
 
-export default {
+export {
   connectDatabase,
   getDatabase,
   disconnectDatabase,

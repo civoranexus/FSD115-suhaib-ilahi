@@ -1,4 +1,4 @@
-import getDatabase from "../config/database.js";
+import {getDatabase} from "../config/database.js";
 
 import hashPassword from
  "../utils/helpers.js";

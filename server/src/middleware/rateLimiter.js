@@ -30,7 +30,7 @@ const uploadLimiter = createRateLimiter({
   max: 20,
 });
 
-export default {
+export  {
   createRateLimiter,
   authLimiter,
   apiLimiter,
