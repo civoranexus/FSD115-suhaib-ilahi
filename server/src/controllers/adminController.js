@@ -1,16 +1,18 @@
-import {
-  suspendUser as _suspendUser,
-  activateUser as _activateUser,
+import adminService from "../services/adminService.js";
+import { sendSuccess } from "../utils/response.js";
+import { HTTP_STATUS_CODES } from "../constants/statusCodes.js";
+import { MESSAGES } from "../constants/messages.js";
+
+const { suspendUser :_suspendUser,
+  activateUser :_activateUser,
   approvKYC,
-  rejectKYC as _rejectKYC,
-  suspendListing as _suspendListing,
-  reactivateListing as _reactivateListing,
-  generateSalesReport as _generateSalesReport,
-  getSystemMetrics as _getSystemMetrics,
-} from "../services/adminService.js";
-import sendSuccess from "../utils/response.js";
-import { OK } from "../constants/statusCodes.js";
-import {
+  rejectKYC : _rejectKYC,
+  suspendListing : _suspendListing,
+  reactivateListing : _reactivateListing,
+  generateSalesReport : _generateSalesReport,
+  getSystemMetrics : _getSystemMetrics,} = adminService;
+const { OK } = HTTP_STATUS_CODES;
+const {
   USER_SUSPENDED,
   USER_ACTIVATED,
   KYC_APPROVED,
@@ -18,7 +20,7 @@ import {
   LISTING_SUSPENDED,
   REPORT_GENERATED,
   AUTH_SUCCESS,
-} from "../constants/messages.js";
+} = MESSAGES;
 
 class AdminController {
   async suspendUser(req, res, next) {

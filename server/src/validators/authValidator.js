@@ -1,10 +1,10 @@
-import { object, string, ref } from "joi";
+import Joi from "joi";
 
-const registerSchema = object({
-  firstName: string().required().trim().max(50),
-  lastName: string().required().trim().max(50),
-  email: string().email().required().lowercase().trim(),
-  password: string()
+const registerSchema = Joi.object({
+  firstName: Joi.string().required().trim().max(50),
+  lastName: Joi.string().required().trim().max(50),
+  email: Joi.string().email().required().lowercase().trim(),
+  password: Joi.string()
     .required()
     .min(8)
     .max(50)
@@ -12,56 +12,56 @@ const registerSchema = object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
       "Password must contain uppercase, lowercase, and number"
     ),
-  confirmPassword: string().required().valid(ref("password")),
-  phoneNumber: string()
+  confirmPassword: Joi.string().required().valid(Joi.ref("password")),
+  phoneNumber: Joi.string()
     .required()
     .pattern(/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/),
-  role: string().valid("buyer", "seller").required(),
-  address: string().max(255),
-  city: string().max(50),
-  state: string().max(50),
-  zipCode: string().pattern(/^[0-9]{5,6}$/),
-  country: string().max(50),
+  role: Joi.string().valid("buyer", "seller").required(),
+  address: Joi.string().max(255),
+  city: Joi.string().max(50),
+  state: Joi.string().max(50),
+  zipCode: Joi.string().pattern(/^[0-9]{5,6}$/),
+  country: Joi.string().max(50),
 });
 
-const loginSchema = object({
-  email: string().email().required().lowercase().trim(),
-  password: string().required(),
+const loginSchema = Joi.object({
+  email: Joi.string().email().required().lowercase().trim(),
+  password: Joi.string().required(),
 });
 
-const refreshTokenSchema = object({
-  refreshToken: string().required(),
+const refreshTokenSchema = Joi.object({
+  refreshToken: Joi.string().required(),
 });
 
-const changePasswordSchema = object({
-  currentPassword: string().required(),
-  newPassword: string()
+const changePasswordSchema = Joi.object({
+  currentPassword: Joi.string().required(),
+  newPassword: Joi.string()
     .required()
     .min(8)
     .pattern(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
       "Password must contain uppercase, lowercase, and number"
     ),
-  confirmPassword: string().required().valid(ref("newPassword")),
+  confirmPassword: Joi.string().required().valid(Joi.ref("newPassword")),
 });
 
-const forgotPasswordSchema = object({
-  email: string().email().required().lowercase().trim(),
+const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required().lowercase().trim(),
 });
 
-const resetPasswordSchema = object({
-  token: string().required(),
-  newPassword: string()
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().required(),
+  newPassword: Joi.string()
     .required()
     .min(8)
     .pattern(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
       "Password must contain uppercase, lowercase, and number"
     ),
-  confirmPassword: string().required().valid(ref("newPassword")),
+  confirmPassword: Joi.string().required().valid(Joi.ref("newPassword")),
 });
 
-export default {
+export  {
   registerSchema,
   loginSchema,
   refreshTokenSchema,

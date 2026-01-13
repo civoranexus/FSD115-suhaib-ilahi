@@ -3,7 +3,9 @@ import Listing from "../models/Listing.js";
 import Transaction from "../models/Transaction.js";
 import { AuthorizationError, NotFoundError } from "../utils/errorHandler.js";
 import logger from "../utils/logger.js";
-import { USER_NOT_FOUND, LISTING_NOT_FOUND } from "../constants/messages.js";
+import { MESSAGES } from "../constants/messages.js";
+
+const { USER_NOT_FOUND, LISTING_NOT_FOUND } = MESSAGES;
 
 class AdminService {
   async suspendUser(userId, reason = null) {

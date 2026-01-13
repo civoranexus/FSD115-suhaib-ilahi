@@ -4,9 +4,9 @@ import { validate }  from "../middleware/validation.js";
 
 import {registerSchema, loginSchema, refreshTokenSchema, changePasswordSchema} from
  "../validators/authValidator.js";
-import authenticate from
+import {authenticate} from
  "../middleware/authenticate.js";
-import authLimiter from "../middleware/rateLimiter.js";
+import {authLimiter} from "../middleware/rateLimiter.js";
 
 const router = Router();
 

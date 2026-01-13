@@ -4,15 +4,19 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
 } from "../config/jwt.js";
-import comparePassword from "../utils/helpers.js";
+import helpers from "../utils/helpers.js";
+
+const { comparePassword } = helpers;
 import {
   AuthenticationError,
   ConflictError,
   NotFoundError,
 } from "../utils/errorHandler.js";
 import logger from "../utils/logger.js";
-import sendEmail from "../config/email.js";
+import emailConfig from "../config/email.js";
 import { MESSAGES } from "../constants/messages.js";
+
+const { sendEmail } = emailConfig;
 
 const { USER_ALREADY_EXISTS, INVALID_CREDENTIALS, USER_NOT_FOUND } = MESSAGES;
 class AuthService {
@@ -126,7 +130,7 @@ class AuthService {
         throw new AuthenticationError("Current password is incorrect");
       }
 
-      const { hashPassword } = require("../utils/helpers").default;
+      const { hashPassword } = helpers;
       const hashedNewPassword = await hashPassword(newPassword);
 
       await User.update(userId, { password: hashedNewPassword });

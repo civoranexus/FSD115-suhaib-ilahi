@@ -1,16 +1,20 @@
-import {
-  register as _register,
-  login as _login,
-  refreshToken as _refreshToken,
-  changePassword as _changePassword,
-} from "../services/authService.js";
-import sendSuccess, { sendError } from "../utils/response.js";
+import  
+ AuthService
+ from "../services/authService.js";
+import {sendSuccess, sendError}  from "../utils/response.js";
 import { HTTP_STATUS_CODES } from "../constants/statusCodes.js";
 import {
   MESSAGES
 } from "../constants/messages.js";
 import logger from "../utils/logger.js";
 
+
+const {
+   register : _register,
+  login : _login,
+  refreshToken : _refreshToken,
+  changePassword : _changePassword,
+} = AuthService;
 const {REGISTRATION_SUCCESS,
   LOGIN_SUCCESS,
   TOKEN_REFRESHED,
