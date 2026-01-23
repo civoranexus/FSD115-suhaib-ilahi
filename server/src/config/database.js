@@ -1,37 +1,39 @@
-import pkg,pg from "pg";
+import pg from "pg";
 import logger from "../utils/logger.js";
 
-const {Pool} = pkg;
+const { Pool } = pg;
 
-const pool = new Pool({
-host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      database: process.env.DB_NAME,
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-         max: parseInt(process.env.DB_POOL_MAX) || 10,
-      idle_timeout: 30,
-      idle_in_transaction_session_timeout: 30000,
-      connection: {
-        application_name: "livestockhub_backend",
-});
- 
-pool.on("connect" () => {
-  console.log("Database connected successfully");
-})
+let pool;
 
 const connectDatabase = async () => {
   try {
-    sql = pg({
-      
-   
-      },
+    pool = new Pool({
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT) || 5432,
+      database: process.env.DB_NAME,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      max: parseInt(process.env.DB_POOL_MAX) || 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+      application_name: "livestockhub_backend",
+    });
+
+    pool.on("connect", () => {
+      logger.info("Database pool connection established");
+    });
+
+    pool.on("error", (err) => {
+      logger.error("Database pool error:", err);
     });
 
     // Test connection
-    await sql`SELECT 1`;
+    const client = await pool.connect();
+    await client.query("SELECT 1");
+    client.release();
+
     logger.info("Database connection established successfully");
-    return sql;
+    return pool;
   } catch (error) {
     logger.error("Database connection failed:", error);
     throw error;
@@ -39,21 +41,17 @@ const connectDatabase = async () => {
 };
 
 const getDatabase = () => {
-  if (!sql) {
+  if (!pool) {
     throw new Error("Database not initialized. Call connectDatabase() first.");
   }
-  return sql;
+  return pool;
 };
 
 const disconnectDatabase = async () => {
-  if (sql) {
-    await sql.end();
+  if (pool) {
+    await pool.end();
     logger.info("Database connection closed");
   }
 };
 
-export {
-  connectDatabase,
-  getDatabase,
-  disconnectDatabase,
-};
+export { connectDatabase, getDatabase, disconnectDatabase };

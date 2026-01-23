@@ -3,14 +3,16 @@ import { sendSuccess } from "../utils/response.js";
 import { HTTP_STATUS_CODES } from "../constants/statusCodes.js";
 import { MESSAGES } from "../constants/messages.js";
 
-const { suspendUser :_suspendUser,
-  activateUser :_activateUser,
-  approvKYC,
-  rejectKYC : _rejectKYC,
-  suspendListing : _suspendListing,
-  reactivateListing : _reactivateListing,
-  generateSalesReport : _generateSalesReport,
-  getSystemMetrics : _getSystemMetrics,} = adminService;
+const {
+  suspendUser: _suspendUser,
+  activateUser: _activateUser,
+  approveKYC: _approveKYC,
+  rejectKYC: _rejectKYC,
+  suspendListing: _suspendListing,
+  reactivateListing: _reactivateListing,
+  generateSalesReport: _generateSalesReport,
+  getSystemMetrics: _getSystemMetrics,
+} = adminService;
 const { OK } = HTTP_STATUS_CODES;
 const {
   USER_SUSPENDED,
@@ -47,7 +49,7 @@ class AdminController {
   async approveKYC(req, res, next) {
     try {
       const { userId } = req.params;
-      const result = await approvKYC(userId);
+      const result = await _approveKYC(userId);
       sendSuccess(res, result, KYC_APPROVED, OK);
     } catch (error) {
       next(error);

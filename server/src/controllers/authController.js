@@ -1,25 +1,22 @@
-import  
- AuthService
- from "../services/authService.js";
-import {sendSuccess, sendError}  from "../utils/response.js";
+import AuthService from "../services/authService.js";
+import { sendSuccess, sendError } from "../utils/response.js";
 import { HTTP_STATUS_CODES } from "../constants/statusCodes.js";
-import {
-  MESSAGES
-} from "../constants/messages.js";
+import { MESSAGES } from "../constants/messages.js";
 import logger from "../utils/logger.js";
 
-
 const {
-   register : _register,
-  login : _login,
-  refreshToken : _refreshToken,
-  changePassword : _changePassword,
+  register: _register,
+  login: _login,
+  refreshToken: _refreshToken,
+  changePassword: _changePassword,
 } = AuthService;
-const {REGISTRATION_SUCCESS,
+const {
+  REGISTRATION_SUCCESS,
   LOGIN_SUCCESS,
   TOKEN_REFRESHED,
-  PASSWORD_CHANGED} = MESSAGES;
-const {OK, CREATED} = HTTP_STATUS_CODES;
+  PASSWORD_CHANGED,
+} = MESSAGES;
+const { OK, CREATED } = HTTP_STATUS_CODES;
 class AuthController {
   async register(req, res, next) {
     try {

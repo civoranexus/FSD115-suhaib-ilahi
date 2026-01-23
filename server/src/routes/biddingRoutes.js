@@ -1,8 +1,7 @@
 import { Router } from "express";
 import biddingController from "../controllers/biddingController.js";
 import { authenticate, authorize } from "../middleware/authenticate.js";
-import {validate} from
- "../middleware/validation.js";
+import { validate } from "../middleware/validation.js";
 import { placeBidSchema } from "../validators/biddingValidator.js";
 import { USER_ROLES } from "../constants/enums.js";
 
@@ -13,31 +12,31 @@ router.post(
   authenticate,
   authorize([USER_ROLES.BUYER]),
   validate(placeBidSchema),
-  biddingController.placeBid
+  biddingController.placeBid,
 );
 router.post(
   "/:bidId/accept",
   authenticate,
   authorize([USER_ROLES.SELLER]),
-  biddingController.acceptBid
+  biddingController.acceptBid,
 );
 router.post(
   "/:bidId/reject",
   authenticate,
   authorize([USER_ROLES.SELLER]),
-  biddingController.rejectBid
+  biddingController.rejectBid,
 );
 router.get(
   "/my-bids",
   authenticate,
   authorize([USER_ROLES.BUYER]),
-  biddingController.getBuyerBids
+  biddingController.getBuyerBids,
 );
 router.get(
   "/listings/:listingId/bids",
   authenticate,
   authorize([USER_ROLES.SELLER]),
-  biddingController.getListingBids
+  biddingController.getListingBids,
 );
 
 export default router;

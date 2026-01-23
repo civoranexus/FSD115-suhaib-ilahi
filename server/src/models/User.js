@@ -1,7 +1,7 @@
-import {getDatabase} from "../config/database.js";
+import { getDatabase } from "../config/database.js";
+import helpers from "../utils/helpers.js";
 
-import hashPassword from
- "../utils/helpers.js";
+const { hashPassword } = helpers;
 
 class User {
   static async create(userData) {

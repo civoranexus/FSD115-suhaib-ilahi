@@ -1,16 +1,16 @@
-import
-  listingService
-from "../services/listingService.js";
+import listingService from "../services/listingService.js";
 import { sendSuccess, sendPaginatedResponse } from "../utils/response.js";
 import { HTTP_STATUS_CODES } from "../constants/statusCodes.js";
 import { MESSAGES } from "../constants/messages.js";
 
-const {createListing : _createListing,
-  getListingDetails : _getListingDetails,
-  updateListing : _updateListing,
-  deleteListing : _deleteListing,
-  searchListings :_searchListings,
-  getSellerListings : _getSellerListings,} = listingService;
+const {
+  createListing: _createListing,
+  getListingDetails: _getListingDetails,
+  updateListing: _updateListing,
+  deleteListing: _deleteListing,
+  searchListings: _searchListings,
+  getSellerListings: _getSellerListings,
+} = listingService;
 const { CREATED, OK } = HTTP_STATUS_CODES;
 const {
   LISTING_CREATED,
@@ -72,7 +72,7 @@ class ListingController {
         result.pagination.total,
         page,
         limit,
-        LISTINGS_RETRIEVED
+        LISTINGS_RETRIEVED,
       );
     } catch (error) {
       next(error);
@@ -90,7 +90,7 @@ class ListingController {
         result.pagination.total,
         page,
         limit,
-        LISTINGS_RETRIEVED
+        LISTINGS_RETRIEVED,
       );
     } catch (error) {
       next(error);
