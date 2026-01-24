@@ -1,9 +1,11 @@
 import { Router } from "express";
 import transactionController from "../controllers/transactionController.js";
 import { authenticate, authorize } from "../middleware/authenticate.js";
-import {validate} from
- "../middleware/validation.js";
-import { createTransactionSchema, updateTransactionStatusSchema } from "../validators/transactionValidator.js";
+import { validate } from "../middleware/validation.js";
+import {
+  createTransactionSchema,
+  updateTransactionStatusSchema,
+} from "../validators/transactionValidator.js";
 import { USER_ROLES } from "../constants/enums.js";
 
 const router = Router();
@@ -13,31 +15,31 @@ router.post(
   authenticate,
   authorize([USER_ROLES.BUYER]),
   validate(createTransactionSchema),
-  transactionController.createTransaction
+  transactionController.createTransaction,
 );
 router.get(
   "/:transactionId",
   authenticate,
-  transactionController.getTransactionDetails
+  transactionController.getTransactionDetails,
 );
 router.put(
   "/:transactionId/status",
   authenticate,
   authorize([USER_ROLES.SELLER]),
   validate(updateTransactionStatusSchema),
-  transactionController.updateTransactionStatus
+  transactionController.updateTransactionStatus,
 );
 router.get(
   "/buyer/my-transactions",
   authenticate,
   authorize([USER_ROLES.BUYER]),
-  transactionController.getBuyerTransactions
+  transactionController.getBuyerTransactions,
 );
 router.get(
   "/seller/my-transactions",
   authenticate,
   authorize([USER_ROLES.SELLER]),
-  transactionController.getSellerTransactions
+  transactionController.getSellerTransactions,
 );
 
 export default router;

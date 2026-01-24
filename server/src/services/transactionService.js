@@ -2,22 +2,20 @@ import Transaction from "../models/Transaction.js";
 import Bid from "../models/Bid.js";
 import Listing from "../models/Listing.js";
 import User from "../models/User.js";
-
 import {
   NotFoundError,
   ValidationError,
   AuthorizationError,
 } from "../utils/errorHandler.js";
-
 import calculatePagination from "../utils/pagination.js";
-
-import generateTransactionId from "../utils/helpers.js";
+import helpers from "../utils/helpers.js";
 import logger from "../utils/logger.js";
 import { MESSAGES } from "../constants/messages.js";
 import emailConfig from "../config/email.js";
 
 const { FORBIDDEN, LISTING_NOT_FOUND } = MESSAGES;
 const { sendEmail } = emailConfig;
+const { generateTransactionId } = helpers;
 
 class TransactionService {
   async createTransaction(bidId, buyerId, transactionData) {
@@ -102,7 +100,7 @@ class TransactionService {
 
       if (transaction.seller_id !== userId) {
         throw new AuthorizationError(
-          "Only seller can update transaction status"
+          "Only seller can update transaction status",
         );
       }
 

@@ -1,10 +1,10 @@
 import User from "../models/User.js";
-import {NotFoundError, ValidationError} from
- "../utils/errorHandler.js";
+import { NotFoundError, ValidationError } from "../utils/errorHandler.js";
 import logger from "../utils/logger.js";
-import sendEmail from
- "../config/email.js";
+import emailConfig from "../config/email.js";
 import { MESSAGES } from "../constants/messages.js";
+
+const { sendEmail } = emailConfig;
 
 const { USER_NOT_FOUND } = MESSAGES;
 
@@ -86,7 +86,7 @@ class UserService {
 
       await this.sendKYCNotificationEmail(
         updatedUser.email,
-        updatedUser.first_name
+        updatedUser.first_name,
       );
 
       logger.info(`KYC submitted for user: ${userId}`);

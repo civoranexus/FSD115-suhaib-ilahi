@@ -52,7 +52,7 @@ class AdminService {
     }
   }
 
-  async approvKYC(userId) {
+  async approveKYC(userId) {
     try {
       const user = await User.findById(userId);
 

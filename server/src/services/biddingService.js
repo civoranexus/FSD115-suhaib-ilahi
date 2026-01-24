@@ -7,13 +7,14 @@ import {
   ValidationError,
 } from "../utils/errorHandler.js";
 import calculatePagination from "../utils/pagination.js";
-import getExpiryDate from "../utils/helpers.js";
+import helpers from "../utils/helpers.js";
 import logger from "../utils/logger.js";
 import { MESSAGES } from "../constants/messages.js";
 import emailConfig from "../config/email.js";
 
 const { LISTING_NOT_FOUND, FORBIDDEN } = MESSAGES;
 const { sendEmail } = emailConfig;
+const { getExpiryDate } = helpers;
 
 class BiddingService {
   async placeBid(listingId, buyerId, bidData) {

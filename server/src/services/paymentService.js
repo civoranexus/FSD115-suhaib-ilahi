@@ -1,22 +1,19 @@
 import Payment from "../models/Payment.js";
 import Transaction from "../models/Transaction.js";
-
-import {NotFoundError, ValidationError, AuthorizationError} from 
- "../utils/errorHandler.js";
-
-
-
-import calculatePagination from
- "../utils/pagination.js";
-
-import generateUUID from
- "../utils/helpers.js";
+import {
+  NotFoundError,
+  ValidationError,
+  AuthorizationError,
+} from "../utils/errorHandler.js";
+import calculatePagination from "../utils/pagination.js";
+import helpers from "../utils/helpers.js";
 import logger from "../utils/logger.js";
 import { MESSAGES } from "../constants/messages.js";
 import emailConfig from "../config/email.js";
 
 const { FORBIDDEN } = MESSAGES;
 const { sendEmail } = emailConfig;
+const { generateUUID } = helpers;
 
 class PaymentService {
   async initiatePayment(transactionId, paymentData, buyerId) {
@@ -33,7 +30,7 @@ class PaymentService {
 
       const referenceNumber = `PAY-${Date.now()}-${generateUUID().substring(
         0,
-        8
+        8,
       )}`;
 
       const newPayment = await Payment.create({
@@ -52,7 +49,7 @@ class PaymentService {
       } else {
         await Payment.update(newPayment.id, { status: "failed" });
         throw new ValidationError(
-          paymentResult.message || "Payment processing failed"
+          paymentResult.message || "Payment processing failed",
         );
       }
 
