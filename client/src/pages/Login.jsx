@@ -1,30 +1,23 @@
 import React, { useState } from "react";
-import register from '../assets/register.webp'
+import login from '../assets/login.webp'
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
-import { registerUser } from "../redux/slices/authSlice";
 import { useDispatch } from "react-redux";
+import { loginUser } from "../redux/slices/authSlice";
 
-const Register = () => {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userName,setUserName] = useState("");
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("user loginned successfully")
+    dispatch(loginUser({email,password}))
+    navigate('/');
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  try {
-    await dispatch(
-      registerUser({ name: userName, email, password })
-    ).unwrap();
-
-    navigate("/");
-  } catch (error) {
-    console.error(error);
   }
-};
+
 
   const handleSuccess = async (credentialResponse) => {
     try {
@@ -44,7 +37,6 @@ const handleSubmit = async (e) => {
       console.error(err);
     }
   }
-  
   return (
     <div className="flex">
       <div className="w-full md:w-1/2 flex-col flex justify-center items-center p-8 md:p-12">
@@ -55,12 +47,12 @@ const handleSubmit = async (e) => {
           <div className="flex justify-center mb-6">
             <h2 className="text-xl font-medium">Rabbit</h2>
           </div>
-          <h2 className="text-2xl text-center font-bold mb-6">Hey There! ✋</h2>
+          <h2 className="text-2xl font-bold mb-6">Hey There! ✋</h2>
           <p className="text-center mb-6">
-            Happy to see you becoming a part of our community!  
+            Enter your username and password to Login
           </p>
           <div className="mb-4 ">
-            <label  className="block text-sm font-semibold mb-2">
+            <label className="block text-sm font-semibold mb-2">
               Email
             </label>
             <input
@@ -69,18 +61,6 @@ const handleSubmit = async (e) => {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-2 border rounded"
               placeholder="Enter your email address"
-            />
-          </div>
-          <div className="mb-4 ">
-            <label  className="block text-sm font-semibold mb-2">
-              Username
-            </label>
-            <input
-              type="text"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              className="w-full p-2 border rounded"
-              placeholder="Username"
             />
           </div>
           <div className="mb-4 ">
@@ -97,17 +77,17 @@ const handleSubmit = async (e) => {
           </div>
           <button
             type="submit"
-            className="w-full bg-black text-white p-2 rounded-lg font-semibold hover:bg-gray-800 transition"
             onClick={handleSubmit}
+            className="w-full bg-black text-white p-2 rounded-lg font-semibold hover:bg-gray-800 transition"
           >
-            Sign Up
+            Sign In
           </button>
 
           <p className="mt-6 text-center text-sm ">Dont't have an account?
-            <Link to="/login" className="text-blue-500">Sign In</Link>
+            <Link to="/register" className="text-blue-500">Register</Link>
           </p>
         </form>
-<div className="w-full max-w-md mt-4">
+        <div className="w-full max-w-md mt-4">
     <div className="flex items-center my-4">
       <hr className="flex-grow border-gray-300" />
       <span className="mx-3 text-sm text-gray-500">OR</span>
@@ -125,9 +105,9 @@ const handleSubmit = async (e) => {
 </div>
       </div>
       <div className="hidden md:block w-1/2 bg-gray-500">
-      <div className="h-full flex flex-col justify-center items-center"><img src={register} alt="Register to account" className="w-full h-[750px] object-cover" /></div></div>
+        <div className="h-full flex flex-col justify-center items-center"><img src={login} alt="Login to account" className="w-full h-[750px] object-cover" /></div></div>
     </div>
   );
 };
 
-export default Register;
+export default Login;
