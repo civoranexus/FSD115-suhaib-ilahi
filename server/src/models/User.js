@@ -1,3 +1,4 @@
+import { log } from "console";
 import { getDatabase } from "../config/database.js";
 import helpers from "../utils/helpers.js";
 
@@ -6,7 +7,7 @@ const { hashPassword } = helpers;
 class User {
   static async create(userData) {
     const sql = getDatabase();
-
+console.log(sql)
     const {
       firstName,
       lastName,
@@ -23,44 +24,62 @@ class User {
 
     const hashedPassword = await hashPassword(password);
 
-    const result = await sql`
-      INSERT INTO users (
-        first_name, last_name, email, password, phone_number,
-        role, address, city, state, zip_code, country
-      ) VALUES (
-        ${firstName}, ${lastName}, ${email}, ${hashedPassword}, ${phoneNumber},
-        ${role}, ${address}, ${city}, ${state}, ${zipCode}, ${country}
-      )
-      RETURNING *
-    `;
+    const result = await sql.query(
+    `INSERT INTO users (
+      first_name, last_name, email, password, phone_number,
+      role, address, city, state, zip_code, country
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+    RETURNING *`,
+    [
+      firstName,
+      lastName,
+      email,
+      hashedPassword,
+      phoneNumber,
+      role,
+      address,
+      city,
+      state,
+      zipCode,
+      country,
+    ]
+  );
 
-    return result[0];
+
+    return result.rows[0];
   }
 
   static async findById(id) {
     const sql = getDatabase();
 
-    const result = await sql`
-      SELECT * FROM users WHERE id = ${id}
-    `;
+    const result = await sql.query(
+      `
+      SELECT * FROM users WHERE id = $1
+    `,
+      [id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async findByEmail(email) {
     const sql = getDatabase();
 
-    const result = await sql`
-      SELECT * FROM users WHERE email = ${email.toLowerCase()}
-    `;
+    const result = await sql.query(
+      `
+      SELECT * FROM users WHERE email = $1
+    `,
+      [email.toLowerCase()],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async findByIdWithRelations(id) {
     const sql = getDatabase();
 
-    const result = await sql`
+    const result = await sql.query(
+      `
       SELECT u.*,
         COUNT(DISTINCT l.id) as listing_count,
         COUNT(DISTINCT b.id) as bid_count,
@@ -69,11 +88,13 @@ class User {
       LEFT JOIN livestock_listings l ON u.id = l.seller_id
       LEFT JOIN bids b ON u.id = b.buyer_id
       LEFT JOIN transactions t ON u.id = t.buyer_id
-      WHERE u.id = ${id}
+      WHERE u.id = $1
       GROUP BY u.id
-    `;
+    `,
+      [id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async update(id, updateData) {
@@ -100,8 +121,9 @@ class User {
       RETURNING *
     `;
 
-    const result = await sql.unsafe(query, [...values, id]);
-    return result[0];
+    const result = await sql.query(query, [...values, id]);
+return result.rows[0];
+
   }
 
   static async updateProfile(id, profileData) {
@@ -117,23 +139,32 @@ class User {
       zipCode,
       country,
     } = profileData;
-
-    const result = await sql`
-      UPDATE users
-      SET first_name = ${firstName || null},
-          last_name = ${lastName || null},
-          phone_number = ${phoneNumber || null},
-          address = ${address || null},
-          city = ${city || null},
-          state = ${state || null},
-          zip_code = ${zipCode || null},
-          country = ${country || null},
-          updated_at = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `;
-
-    return result[0];
+const result = await sql.query(
+  `UPDATE users
+   SET first_name   = $1,
+       last_name    = $2,
+       phone_number = $3,
+       address      = $4,
+       city         = $5,
+       state        = $6,
+       zip_code     = $7,
+       country      = $8,
+       updated_at   = NOW()
+   WHERE id = $9
+   RETURNING *`,
+  [
+    firstName ?? null,
+    lastName ?? null,
+    phoneNumber ?? null,
+    address ?? null,
+    city ?? null,
+    state ?? null,
+    zipCode ?? null,
+    country ?? null,
+    id
+  ]
+);
+    return result.rows[0];
   }
 
   static async submitKYC(id, kycData) {
@@ -150,38 +181,50 @@ class User {
       zipCode,
     } = kycData;
 
-    const result = await sql`
-      UPDATE users
-      SET id_type = ${idType},
-          id_number = ${idNumber},
-          document_urls = ${JSON.stringify(documentUrls)},
-          date_of_birth = ${dateOfBirth},
-          kyc_status = 'pending',
-          address = ${address},
-          city = ${city},
-          state = ${state},
-          zip_code = ${zipCode},
-          updated_at = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `;
+    const result = await sql.query(
+      `UPDATE users
+   SET id_type = $1,
+       id_number = $2,
+       document_urls = $3,
+       date_of_birth = $4,
+       kyc_status = 'pending',
+       address = $5,
+       city = $6,
+       state = $7,
+       zip_code = $8,
+       updated_at = NOW()
+   WHERE id = $9
+   RETURNING *`,
+      [
+        idType,
+        idNumber,
+        JSON.stringify(documentUrls),
+        dateOfBirth,
+        address,
+        city,
+        state,
+        zipCode,
+        id,
+      ],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async updateKYCStatus(id, status, reason = null) {
     const sql = getDatabase();
 
-    const result = await sql`
-      UPDATE users
-      SET kyc_status = ${status},
-          kyc_rejection_reason = ${reason},
-          updated_at = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `;
+    const result = await sql.query(
+      `UPDATE users
+   SET kyc_status = $1,
+       kyc_rejection_reason = $2,
+       updated_at = NOW()
+   WHERE id = $3
+   RETURNING *`,
+      [status, reason, id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async list(filters = {}, pagination = {}) {
@@ -191,69 +234,92 @@ class User {
 
     const { limit = 10, offset = 0 } = pagination;
 
-    let query = sql`
-      SELECT * FROM users
-      WHERE 1=1
-    `;
+    let baseQuery = `SELECT * FROM users WHERE 1=1`;
+    let values = [];
+    let idx = 1;
 
-    if (role) query = sql`${query} AND role = ${role}`;
-    if (status) query = sql`${query} AND status = ${status}`;
-    if (kycStatus) query = sql`${query} AND kyc_status = ${kycStatus}`;
-    if (search) {
-      query = sql`
-        ${query}
-        AND (first_name ILIKE ${"%" + search + "%"}
-          OR last_name ILIKE ${"%" + search + "%"}
-          OR email ILIKE ${"%" + search + "%"})
-      `;
+    if (role) {
+      baseQuery += ` AND role = $${idx++}`;
+      values.push(role);
     }
 
-    const result = await query`
-      ORDER BY created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+    if (status) {
+      baseQuery += ` AND status = $${idx++}`;
+      values.push(status);
+    }
 
-    const countResult = await sql`SELECT COUNT(*) FROM users`;
-    const total = parseInt(countResult[0].count);
+    if (kycStatus) {
+      baseQuery += ` AND kyc_status = $${idx++}`;
+      values.push(kycStatus);
+    }
 
-    return { data: result, total };
+    if (search) {
+      baseQuery += ` AND (
+    first_name ILIKE $${idx}
+    OR last_name ILIKE $${idx}
+    OR email ILIKE $${idx}
+  )`;
+      values.push(`%${search}%`);
+      idx++;
+    }
+
+    // Pagination
+    baseQuery += ` ORDER BY created_at DESC LIMIT $${idx++} OFFSET $${idx++}`;
+    values.push(limit, offset);
+
+    const result = await sql.query(baseQuery, values);
+    const countResult = await sql.query(`SELECT COUNT(*) FROM users`);
+
+    return {
+      data: result,
+      total: parseInt(countResult.rows[0].count),
+    };
   }
 
   static async updateRole(id, newRole) {
     const sql = getDatabase();
 
-    const result = await sql`
+    const result = await sql.query(
+      `
       UPDATE users
-      SET role = ${newRole}, updated_at = NOW()
-      WHERE id = ${id}
+      SET role = $1, updated_at = NOW()
+      WHERE id = $2
       RETURNING *
-    `;
+    `,
+      [newRole, id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async updateStatus(id, status) {
     const sql = getDatabase();
 
-    const result = await sql`
+    const result = await sql.query(
+      `
       UPDATE users
-      SET status = ${status}, updated_at = NOW()
-      WHERE id = ${id}
+      SET status = $1, updated_at = NOW()
+      WHERE id = $2
       RETURNING *
-    `;
+    `,
+      [status, id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async delete(id) {
     const sql = getDatabase();
 
-    const result = await sql`
-      DELETE FROM users WHERE id = ${id}
+    const result = await sql.query(
+      `
+      DELETE FROM users WHERE id = $1
       RETURNING *
-    `;
+    `,
+      [id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 }
 
