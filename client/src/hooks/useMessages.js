@@ -31,7 +31,7 @@ export const useMessages = () => {
   const fetchConversations = async () => {
     try {
       const response = await messagesService.getConversations()
-      dispatch(setConversations(response.data.conversations))
+      dispatch(setConversations(response.data.data || []))
     } catch (error) {
       console.error('Error fetching conversations:', error)
     }
@@ -40,7 +40,7 @@ export const useMessages = () => {
   const fetchMessages = async (conversationId) => {
     try {
       const response = await messagesService.getMessages(conversationId)
-      dispatch(setMessages(response.data.messages))
+      dispatch(setMessages(response.data.data || []))
       dispatch(setActiveConversation(conversationId))
     } catch (error) {
       console.error('Error fetching messages:', error)
@@ -50,8 +50,8 @@ export const useMessages = () => {
   const sendMessage = async (conversationId, text) => {
     try {
       const response = await messagesService.sendMessage(conversationId, text)
-      dispatch(addMessage(response.data.message))
-      socketEmit(socketEvents.MESSAGE_SENT, response.data.message)
+      dispatch(addMessage(response.data.data))
+      socketEmit(socketEvents.MESSAGE_SENT, response.data.data)
     } catch (error) {
       console.error('Error sending message:', error)
     }
@@ -60,8 +60,8 @@ export const useMessages = () => {
   const createConversation = async (userId) => {
     try {
       const response = await messagesService.createConversation(userId)
-      dispatch(addConversation(response.data.conversation))
-      return response.data.conversation
+      dispatch(addConversation(response.data.data))
+      return response.data.data
     } catch (error) {
       console.error('Error creating conversation:', error)
     }

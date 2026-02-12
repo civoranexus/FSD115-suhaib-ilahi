@@ -7,26 +7,26 @@ class Notification {
     const { userId, type, title, description, relatedId, relatedType } =
       notificationData;
 
-    const result = await sql`
-      INSERT INTO notifications (
+    const result = await sql.query(
+      `INSERT INTO notifications (
         user_id, type, title, description, related_id, related_type, is_read
-      ) VALUES (
-        ${userId}, ${type}, ${title}, ${description}, ${relatedId}, ${relatedType}, false
-      )
-      RETURNING *
-    `;
+      ) VALUES ($1, $2, $3, $4, $5, $6, false)
+      RETURNING *`,
+      [userId, type, title, description, relatedId, relatedType],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async findById(id) {
     const sql = getDatabase();
 
-    const result = await sql`
-      SELECT * FROM notifications WHERE id = ${id}
-    `;
+    const result = await sql.query(
+      `SELECT * FROM notifications WHERE id = $1`,
+      [id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async getByUserId(userId, pagination = {}) {
@@ -34,44 +34,48 @@ class Notification {
 
     const { limit = 20, offset = 0 } = pagination;
 
-    const result = await sql`
-      SELECT * FROM notifications
-      WHERE user_id = ${userId}
+    const result = await sql.query(
+      `SELECT * FROM notifications
+      WHERE user_id = $1
       ORDER BY created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+      LIMIT $2 OFFSET $3`,
+      [userId, limit, offset],
+    );
 
-    const countResult = await sql`
-      SELECT COUNT(*) FROM notifications WHERE user_id = ${userId}
-    `;
+    const countResult = await sql.query(
+      `SELECT COUNT(*) as count FROM notifications WHERE user_id = $1`,
+      [userId],
+    );
 
     return {
-      data: result,
-      total: parseInt(countResult[0].count),
+      data: result.rows,
+      total: parseInt(countResult.rows[0].count),
     };
   }
 
   static async markAsRead(id) {
     const sql = getDatabase();
 
-    const result = await sql`
-      UPDATE notifications
+    const result = await sql.query(
+      `UPDATE notifications
       SET is_read = true, updated_at = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `;
+      WHERE id = $1
+      RETURNING *`,
+      [id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async markAllAsRead(userId) {
     const sql = getDatabase();
 
-    await sql`
-      UPDATE notifications
+    await sql.query(
+      `UPDATE notifications
       SET is_read = true, updated_at = NOW()
-      WHERE user_id = ${userId} AND is_read = false
-    `;
+      WHERE user_id = $1 AND is_read = false`,
+      [userId],
+    );
 
     return true;
   }
@@ -79,20 +83,19 @@ class Notification {
   static async deleteNotification(id) {
     const sql = getDatabase();
 
-    const result = await sql`
-      DELETE FROM notifications WHERE id = ${id}
-      RETURNING *
-    `;
+    const result = await sql.query(
+      `DELETE FROM notifications WHERE id = $1
+      RETURNING *`,
+      [id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async deleteAllByUser(userId) {
     const sql = getDatabase();
 
-    await sql`
-      DELETE FROM notifications WHERE user_id = ${userId}
-    `;
+    await sql.query(`DELETE FROM notifications WHERE user_id = $1`, [userId]);
 
     return true;
   }

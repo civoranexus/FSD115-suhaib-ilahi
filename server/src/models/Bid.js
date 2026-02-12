@@ -6,44 +6,45 @@ class Bid {
 
     const { listingId, buyerId, bidAmount, bidType, expiryDate } = bidData;
 
-    const result = await sql`
-      INSERT INTO bids (
+    const result = await sql.query(
+      `INSERT INTO bids (
         listing_id, buyer_id, bid_amount, bid_type, expiry_date, status
-      ) VALUES (
-        ${listingId}, ${buyerId}, ${bidAmount}, ${bidType}, ${expiryDate}, 'pending'
-      )
-      RETURNING *
-    `;
+      ) VALUES ($1, $2, $3, $4, $5, 'pending')
+      RETURNING *`,
+      [listingId, buyerId, bidAmount, bidType, expiryDate],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async findById(id) {
     const sql = getDatabase();
 
-    const result = await sql`
-      SELECT b.*, u.first_name, u.last_name, u.email, l.title as listing_title
+    const result = await sql.query(
+      `SELECT b.*, u.first_name, u.last_name, u.email, l.title as listing_title
       FROM bids b
       LEFT JOIN users u ON b.buyer_id = u.id
       LEFT JOIN livestock_listings l ON b.listing_id = l.id
-      WHERE b.id = ${id}
-    `;
+      WHERE b.id = $1`,
+      [id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async findByListingId(listingId) {
     const sql = getDatabase();
 
-    const result = await sql`
-      SELECT b.*, u.first_name, u.last_name, u.email
+    const result = await sql.query(
+      `SELECT b.*, u.first_name, u.last_name, u.email
       FROM bids b
       LEFT JOIN users u ON b.buyer_id = u.id
-      WHERE b.listing_id = ${listingId}
-      ORDER BY b.bid_amount DESC, b.created_at DESC
-    `;
+      WHERE b.listing_id = $1
+      ORDER BY b.bid_amount DESC, b.created_at DESC`,
+      [listingId],
+    );
 
-    return result;
+    return result.rows;
   }
 
   static async update(id, updateData) {
@@ -51,29 +52,31 @@ class Bid {
 
     const { bidAmount, status } = updateData;
 
-    const result = await sql`
-      UPDATE bids
-      SET bid_amount = COALESCE(${bidAmount}, bid_amount),
-          status = COALESCE(${status}, status),
+    const result = await sql.query(
+      `UPDATE bids
+      SET bid_amount = COALESCE($2, bid_amount),
+          status = COALESCE($3, status),
           updated_at = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `;
+      WHERE id = $1
+      RETURNING *`,
+      [id, bidAmount, status],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async updateStatus(id, status) {
     const sql = getDatabase();
 
-    const result = await sql`
-      UPDATE bids
-      SET status = ${status}, updated_at = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `;
+    const result = await sql.query(
+      `UPDATE bids
+      SET status = $2, updated_at = NOW()
+      WHERE id = $1
+      RETURNING *`,
+      [id, status],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async getByBuyerId(buyerId, pagination = {}) {
@@ -81,47 +84,51 @@ class Bid {
 
     const { limit = 10, offset = 0 } = pagination;
 
-    const result = await sql`
-      SELECT b.*, l.title as listing_title
+    const result = await sql.query(
+      `SELECT b.*, l.title as listing_title
       FROM bids b
       LEFT JOIN livestock_listings l ON b.listing_id = l.id
-      WHERE b.buyer_id = ${buyerId}
+      WHERE b.buyer_id = $1
       ORDER BY b.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+      LIMIT $2 OFFSET $3`,
+      [buyerId, limit, offset],
+    );
 
-    const countResult = await sql`
-      SELECT COUNT(*) FROM bids WHERE buyer_id = ${buyerId}
-    `;
+    const countResult = await sql.query(
+      `SELECT COUNT(*) as count FROM bids WHERE buyer_id = $1`,
+      [buyerId],
+    );
 
     return {
-      data: result,
-      total: parseInt(countResult[0].count),
+      data: result.rows,
+      total: parseInt(countResult.rows[0].count),
     };
   }
 
   static async getHighestBid(listingId) {
     const sql = getDatabase();
 
-    const result = await sql`
-      SELECT * FROM bids
-      WHERE listing_id = ${listingId} AND status != 'rejected'
+    const result = await sql.query(
+      `SELECT * FROM bids
+      WHERE listing_id = $1 AND status != 'rejected'
       ORDER BY bid_amount DESC
-      LIMIT 1
-    `;
+      LIMIT 1`,
+      [listingId],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async delete(id) {
     const sql = getDatabase();
 
-    const result = await sql`
-      DELETE FROM bids WHERE id = ${id}
-      RETURNING *
-    `;
+    const result = await sql.query(
+      `DELETE FROM bids WHERE id = $1
+      RETURNING *`,
+      [id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 }
 

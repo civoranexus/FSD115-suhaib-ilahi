@@ -5,22 +5,17 @@ import { MESSAGES } from "../constants/messages.js";
 import logger from "../utils/logger.js";
 
 const {
-  register: _register,
-  login: _login,
-  refreshToken: _refreshToken,
-  changePassword: _changePassword,
-} = AuthService;
-const {
   REGISTRATION_SUCCESS,
   LOGIN_SUCCESS,
   TOKEN_REFRESHED,
   PASSWORD_CHANGED,
 } = MESSAGES;
 const { OK, CREATED } = HTTP_STATUS_CODES;
+
 class AuthController {
   async register(req, res, next) {
     try {
-      const result = await _register(req.body);
+      const result = await AuthService.register(req.body);
       sendSuccess(res, result, REGISTRATION_SUCCESS, CREATED);
     } catch (error) {
       next(error);
@@ -30,7 +25,7 @@ class AuthController {
   async login(req, res, next) {
     try {
       const { email, password } = req.body;
-      const result = await _login(email, password);
+      const result = await AuthService.login(email, password);
       sendSuccess(res, result, LOGIN_SUCCESS, OK);
     } catch (error) {
       next(error);
@@ -40,7 +35,7 @@ class AuthController {
   async refreshToken(req, res, next) {
     try {
       const { refreshToken } = req.body;
-      const result = await _refreshToken(refreshToken);
+      const result = await AuthService.refreshToken(refreshToken);
       sendSuccess(res, result, TOKEN_REFRESHED, OK);
     } catch (error) {
       next(error);
@@ -50,7 +45,7 @@ class AuthController {
   async changePassword(req, res, next) {
     try {
       const { currentPassword, newPassword } = req.body;
-      await _changePassword(req.user.userId, currentPassword, newPassword);
+      await AuthService.changePassword(req.user.userId, currentPassword, newPassword);
       sendSuccess(res, null, PASSWORD_CHANGED, OK);
     } catch (error) {
       next(error);
@@ -59,3 +54,4 @@ class AuthController {
 }
 
 export default new AuthController();
+

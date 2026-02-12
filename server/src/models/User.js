@@ -1,4 +1,3 @@
-import { log } from "console";
 import { getDatabase } from "../config/database.js";
 import helpers from "../utils/helpers.js";
 
@@ -7,7 +6,6 @@ const { hashPassword } = helpers;
 class User {
   static async create(userData) {
     const sql = getDatabase();
-console.log(sql)
     const {
       firstName,
       lastName,
@@ -25,26 +23,25 @@ console.log(sql)
     const hashedPassword = await hashPassword(password);
 
     const result = await sql.query(
-    `INSERT INTO users (
+      `INSERT INTO users (
       first_name, last_name, email, password, phone_number,
       role, address, city, state, zip_code, country
     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
     RETURNING *`,
-    [
-      firstName,
-      lastName,
-      email,
-      hashedPassword,
-      phoneNumber,
-      role,
-      address,
-      city,
-      state,
-      zipCode,
-      country,
-    ]
-  );
-
+      [
+        firstName,
+        lastName,
+        email,
+        hashedPassword,
+        phoneNumber,
+        role,
+        address,
+        city,
+        state,
+        zipCode,
+        country,
+      ],
+    );
 
     return result.rows[0];
   }
@@ -122,8 +119,7 @@ console.log(sql)
     `;
 
     const result = await sql.query(query, [...values, id]);
-return result.rows[0];
-
+    return result.rows[0];
   }
 
   static async updateProfile(id, profileData) {
@@ -139,8 +135,8 @@ return result.rows[0];
       zipCode,
       country,
     } = profileData;
-const result = await sql.query(
-  `UPDATE users
+    const result = await sql.query(
+      `UPDATE users
    SET first_name   = $1,
        last_name    = $2,
        phone_number = $3,
@@ -152,18 +148,18 @@ const result = await sql.query(
        updated_at   = NOW()
    WHERE id = $9
    RETURNING *`,
-  [
-    firstName ?? null,
-    lastName ?? null,
-    phoneNumber ?? null,
-    address ?? null,
-    city ?? null,
-    state ?? null,
-    zipCode ?? null,
-    country ?? null,
-    id
-  ]
-);
+      [
+        firstName ?? null,
+        lastName ?? null,
+        phoneNumber ?? null,
+        address ?? null,
+        city ?? null,
+        state ?? null,
+        zipCode ?? null,
+        country ?? null,
+        id,
+      ],
+    );
     return result.rows[0];
   }
 

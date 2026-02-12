@@ -15,34 +15,41 @@ class Transaction {
       additionalNotes,
     } = transactionData;
 
-    const result = await sql`
-      INSERT INTO transactions (
+    const result = await sql.query(
+      `INSERT INTO transactions (
         bid_id, buyer_id, seller_id, listing_id, amount, payment_method,
         delivery_address, additional_notes, status
-      ) VALUES (
-        ${bidId}, ${buyerId}, ${sellerId}, ${listingId}, ${amount},
-        ${paymentMethod}, ${JSON.stringify(deliveryAddress)},
-        ${additionalNotes}, 'pending'
-      )
-      RETURNING *
-    `;
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending')
+      RETURNING *`,
+      [
+        bidId,
+        buyerId,
+        sellerId,
+        listingId,
+        amount,
+        paymentMethod,
+        JSON.stringify(deliveryAddress),
+        additionalNotes,
+      ],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async findById(id) {
     const sql = getDatabase();
 
-    const result = await sql`
-      SELECT t.*, b.*, u.first_name, u.last_name, u.email, l.title as listing_title
+    const result = await sql.query(
+      `SELECT t.*, b.*, u.first_name, u.last_name, u.email, l.title as listing_title
       FROM transactions t
       LEFT JOIN bids b ON t.bid_id = b.id
       LEFT JOIN users u ON t.buyer_id = u.id
       LEFT JOIN livestock_listings l ON t.listing_id = l.id
-      WHERE t.id = ${id}
-    `;
+      WHERE t.id = $1`,
+      [id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async update(id, updateData) {
@@ -50,16 +57,17 @@ class Transaction {
 
     const { status, notes } = updateData;
 
-    const result = await sql`
-      UPDATE transactions
-      SET status = COALESCE(${status}, status),
-          notes = COALESCE(${notes}, notes),
+    const result = await sql.query(
+      `UPDATE transactions
+      SET status = COALESCE($2, status),
+          notes = COALESCE($3, notes),
           updated_at = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `;
+      WHERE id = $1
+      RETURNING *`,
+      [id, status, notes],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async getByBuyerId(buyerId, pagination = {}) {
@@ -67,22 +75,24 @@ class Transaction {
 
     const { limit = 10, offset = 0 } = pagination;
 
-    const result = await sql`
-      SELECT t.*, l.title as listing_title
+    const result = await sql.query(
+      `SELECT t.*, l.title as listing_title
       FROM transactions t
       LEFT JOIN livestock_listings l ON t.listing_id = l.id
-      WHERE t.buyer_id = ${buyerId}
+      WHERE t.buyer_id = $1
       ORDER BY t.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+      LIMIT $2 OFFSET $3`,
+      [buyerId, limit, offset],
+    );
 
-    const countResult = await sql`
-      SELECT COUNT(*) FROM transactions WHERE buyer_id = ${buyerId}
-    `;
+    const countResult = await sql.query(
+      `SELECT COUNT(*) as count FROM transactions WHERE buyer_id = $1`,
+      [buyerId],
+    );
 
     return {
-      data: result,
-      total: parseInt(countResult[0].count),
+      data: result.rows,
+      total: parseInt(countResult.rows[0].count),
     };
   }
 
@@ -91,23 +101,25 @@ class Transaction {
 
     const { limit = 10, offset = 0 } = pagination;
 
-    const result = await sql`
-      SELECT t.*, u.first_name, u.last_name, l.title as listing_title
+    const result = await sql.query(
+      `SELECT t.*, u.first_name, u.last_name, l.title as listing_title
       FROM transactions t
       LEFT JOIN users u ON t.buyer_id = u.id
       LEFT JOIN livestock_listings l ON t.listing_id = l.id
-      WHERE t.seller_id = ${sellerId}
+      WHERE t.seller_id = $1
       ORDER BY t.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+      LIMIT $2 OFFSET $3`,
+      [sellerId, limit, offset],
+    );
 
-    const countResult = await sql`
-      SELECT COUNT(*) FROM transactions WHERE seller_id = ${sellerId}
-    `;
+    const countResult = await sql.query(
+      `SELECT COUNT(*) as count FROM transactions WHERE seller_id = $1`,
+      [sellerId],
+    );
 
     return {
-      data: result,
-      total: parseInt(countResult[0].count),
+      data: result.rows,
+      total: parseInt(countResult.rows[0].count),
     };
   }
 
@@ -116,32 +128,36 @@ class Transaction {
 
     const { limit = 10, offset = 0 } = pagination;
 
-    const result = await sql`
-      SELECT t.*, u.first_name, u.last_name, l.title as listing_title
+    const result = await sql.query(
+      `SELECT t.*, u.first_name, u.last_name, l.title as listing_title
       FROM transactions t
       LEFT JOIN users u ON t.buyer_id = u.id
       LEFT JOIN livestock_listings l ON t.listing_id = l.id
       ORDER BY t.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+      LIMIT $1 OFFSET $2`,
+      [limit, offset],
+    );
 
-    const countResult = await sql`SELECT COUNT(*) FROM transactions`;
+    const countResult = await sql.query(
+      `SELECT COUNT(*) as count FROM transactions`,
+    );
 
     return {
-      data: result,
-      total: parseInt(countResult[0].count),
+      data: result.rows,
+      total: parseInt(countResult.rows[0].count),
     };
   }
 
   static async delete(id) {
     const sql = getDatabase();
 
-    const result = await sql`
-      DELETE FROM transactions WHERE id = ${id}
-      RETURNING *
-    `;
+    const result = await sql.query(
+      `DELETE FROM transactions WHERE id = $1
+      RETURNING *`,
+      [id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 }
 

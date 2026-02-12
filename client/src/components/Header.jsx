@@ -11,10 +11,11 @@ const Header = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { isAuthenticated, user, logout } = useAuth()
-  const { unreadCount: notificationCount } = useNotifications()
+  const { unreadCount: notificationCount, items, markAsRead, markAllAsRead } = useNotifications()
   const { unreadCount: messageCount } = useMessages()
   const mobileMenuOpen = useSelector(state => state.ui.mobileMenuOpen)
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
 
   const handleLogout = async () => {
     await logout()
@@ -47,13 +48,64 @@ const Header = () => {
           {isAuthenticated ? (
             <>
               {/* Notifications */}
+              {/* Notifications */}
               <div className="relative">
-                <button className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors">
+                <button
+                  onClick={() => {
+                    setNotificationsOpen(!notificationsOpen)
+                    setProfileMenuOpen(false)
+                  }}
+                  className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                >
                   <FiBell className="w-5 h-5" />
                   {notificationCount > 0 && (
                     <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                   )}
                 </button>
+
+                {notificationsOpen && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50 border border-gray-100 max-h-[400px] overflow-y-auto">
+                    <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                      <h3 className="font-semibold text-gray-700">Notifications</h3>
+                      {notificationCount > 0 && (
+                        <button
+                          onClick={markAllAsRead}
+                          className="text-xs text-blue-600 hover:text-blue-800"
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+                    <div>
+                      {items.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500 text-sm">
+                          No notifications
+                        </div>
+                      ) : (
+                        items.map(item => (
+                          <div
+                            key={item._id || item.id}
+                            onClick={() => {
+                              markAsRead(item._id || item.id)
+                              if (item.link) {
+                                navigate(item.link)
+                                setNotificationsOpen(false)
+                              }
+                            }}
+                            className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${!item.read ? 'bg-blue-50/50' : ''
+                              }`}
+                          >
+                            <p className="text-sm font-medium text-gray-800">{item.title}</p>
+                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">{item.message}</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {new Date(item.createdAt || item.timestamp).toLocaleDateString()}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Messages */}

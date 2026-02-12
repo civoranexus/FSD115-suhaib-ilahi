@@ -1,12 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { authService } from '../../services/api/authService'
 
+const JWT_KEY = import.meta.env.VITE_JWT_STORAGE_KEY || 'auth_token'
+const USER_KEY = import.meta.env.VITE_USER_STORAGE_KEY || 'user_data'
+
 const initialState = {
-  user: null,
-  token: localStorage.getItem(import.meta.env.VITE_JWT_STORAGE_KEY) || null,
+  user: JSON.parse(localStorage.getItem(USER_KEY) || 'null'),
+  token: localStorage.getItem(JWT_KEY) || null,
   loading: false,
   error: null,
-  isAuthenticated: !!localStorage.getItem(import.meta.env.VITE_JWT_STORAGE_KEY),
+  isAuthenticated: !!localStorage.getItem(JWT_KEY),
   kycVerified: false,
 }
 
@@ -15,9 +18,12 @@ export const loginAsync = createAsyncThunk(
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const response = await authService.login({ email, password })
-      localStorage.setItem(import.meta.env.VITE_JWT_STORAGE_KEY, response.data.token)
-      localStorage.setItem(import.meta.env.VITE_USER_STORAGE_KEY, JSON.stringify(response.data.user))
-      return response.data
+      // Backend response: { success, data: { user, accessToken, refreshToken } }
+      const { user, accessToken, refreshToken } = response.data.data
+      localStorage.setItem(JWT_KEY, accessToken)
+      localStorage.setItem('refresh_token', refreshToken)
+      localStorage.setItem(USER_KEY, JSON.stringify(user))
+      return { user, token: accessToken }
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Login failed')
     }
@@ -29,7 +35,12 @@ export const registerAsync = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await authService.register(userData)
-      return response.data
+      // Backend response: { success, data: { user, accessToken, refreshToken } }
+      const { user, accessToken, refreshToken } = response.data.data
+      localStorage.setItem(JWT_KEY, accessToken)
+      localStorage.setItem('refresh_token', refreshToken)
+      localStorage.setItem(USER_KEY, JSON.stringify(user))
+      return { user, token: accessToken }
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Registration failed')
     }
@@ -41,7 +52,7 @@ export const verifyKYCAsync = createAsyncThunk(
   async (kycData, { rejectWithValue }) => {
     try {
       const response = await authService.verifyKYC(kycData)
-      return response.data
+      return response.data.data
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'KYC verification failed')
     }
@@ -53,7 +64,8 @@ export const getUserAsync = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await authService.getUser()
-      return response.data
+      // Backend response: { success, data: { user } }
+      return response.data.data
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch user')
     }
@@ -65,11 +77,26 @@ export const logoutAsync = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await authService.logout()
-      localStorage.removeItem(import.meta.env.VITE_JWT_STORAGE_KEY)
-      localStorage.removeItem(import.meta.env.VITE_USER_STORAGE_KEY)
       return null
     } catch (error) {
+      // Even if API call fails, clear local data
+      localStorage.removeItem(JWT_KEY)
+      localStorage.removeItem(USER_KEY)
+      localStorage.removeItem('refresh_token')
       return rejectWithValue('Logout failed')
+    }
+  }
+)
+
+export const updateProfileAsync = createAsyncThunk(
+  'auth/updateProfile',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await authService.updateProfile(userData)
+      // Return updated user object
+      return response.data.data.user
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update profile')
     }
   }
 )
@@ -97,7 +124,7 @@ const authSlice = createSlice({
         state.token = action.payload.token
         state.user = action.payload.user
         state.isAuthenticated = true
-        state.kycVerified = action.payload.user?.kycVerified || false
+        state.kycVerified = action.payload.user?.kycStatus === 'verified'
       })
       .addCase(loginAsync.rejected, (state, action) => {
         state.loading = false
@@ -108,8 +135,11 @@ const authSlice = createSlice({
         state.loading = true
         state.error = null
       })
-      .addCase(registerAsync.fulfilled, (state) => {
+      .addCase(registerAsync.fulfilled, (state, action) => {
         state.loading = false
+        state.token = action.payload.token
+        state.user = action.payload.user
+        state.isAuthenticated = true
       })
       .addCase(registerAsync.rejected, (state, action) => {
         state.loading = false
@@ -119,11 +149,11 @@ const authSlice = createSlice({
         state.loading = true
         state.error = null
       })
-      .addCase(verifyKYCAsync.fulfilled, (state, action) => {
+      .addCase(verifyKYCAsync.fulfilled, (state) => {
         state.loading = false
         state.kycVerified = true
         if (state.user) {
-          state.user.kycVerified = true
+          state.user.kycStatus = 'verified'
         }
       })
       .addCase(verifyKYCAsync.rejected, (state, action) => {
@@ -136,8 +166,26 @@ const authSlice = createSlice({
       .addCase(getUserAsync.fulfilled, (state, action) => {
         state.loading = false
         state.user = action.payload
+        state.isAuthenticated = true
       })
       .addCase(getUserAsync.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+        state.isAuthenticated = false
+        state.token = null
+        state.user = null
+      })
+      .addCase(updateProfileAsync.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(updateProfileAsync.fulfilled, (state, action) => {
+        state.loading = false
+        state.user = { ...state.user, ...action.payload }
+        localStorage.setItem(USER_KEY, JSON.stringify(state.user))
+        alert('Profile Updated Successfully')
+      })
+      .addCase(updateProfileAsync.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
       })

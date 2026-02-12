@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useMessages } from '../../hooks/useMessages'
+import { useAuth } from '../../hooks/useAuth'
 import { formatRelativeTime } from '../../utils/formatters'
 import Card from '../../components/Card'
 import Input from '../../components/Input'
@@ -8,6 +9,7 @@ import Loading from '../../components/Loading'
 import { FiSend, FiSearch } from 'react-icons/fi'
 
 const Messages = () => {
+  const { user } = useAuth()
   const {
     conversations,
     activeConversation,
@@ -56,9 +58,8 @@ const Messages = () => {
               <button
                 key={conv._id}
                 onClick={() => fetchMessages(conv._id)}
-                className={`w-full p-4 border-b border-gray-100 text-left hover:bg-gray-50 transition-colors ${
-                  activeConversation === conv._id ? 'bg-blue-50' : ''
-                }`}
+                className={`w-full p-4 border-b border-gray-100 text-left hover:bg-gray-50 transition-colors ${activeConversation === conv._id ? 'bg-blue-50' : ''
+                  }`}
               >
                 <p className="font-medium text-sm">{conv.participant?.name}</p>
                 <p className="text-xs text-gray-500 truncate">{conv.lastMessage?.text}</p>
@@ -79,14 +80,13 @@ const Messages = () => {
               {messages.map(msg => (
                 <div
                   key={msg._id}
-                  className={`flex ${msg.senderId === 'currentUser' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${msg.sender === user?._id || msg.sender === user?.id || msg.sender === 'currentUser' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-xs px-4 py-2 rounded-lg ${
-                      msg.senderId === 'currentUser'
+                    className={`max-w-xs px-4 py-2 rounded-lg ${msg.sender === user?._id || msg.sender === user?.id || msg.sender === 'currentUser'
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-200 text-gray-900'
-                    }`}
+                      }`}
                   >
                     <p className="text-sm">{msg.text}</p>
                     <p className="text-xs opacity-70 mt-1">

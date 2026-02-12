@@ -15,6 +15,7 @@ export const fetchListingsAsync = createAsyncThunk(
   async ({ page = 1, limit = 20, filters = {} }, { rejectWithValue }) => {
     try {
       const response = await listingsService.getListings(page, limit, filters)
+      // Backend: { success, data, pagination, ... }
       return response.data
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch listings')
@@ -27,7 +28,7 @@ export const fetchListingByIdAsync = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await listingsService.getListingById(id)
-      return response.data
+      return response.data.data
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch listing')
     }
@@ -39,7 +40,7 @@ export const createListingAsync = createAsyncThunk(
   async (listingData, { rejectWithValue }) => {
     try {
       const response = await listingsService.createListing(listingData)
-      return response.data
+      return response.data.data
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to create listing')
     }
@@ -51,7 +52,7 @@ export const updateListingAsync = createAsyncThunk(
   async ({ id, data }, { rejectWithValue }) => {
     try {
       const response = await listingsService.updateListing(id, data)
-      return response.data
+      return response.data.data
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to update listing')
     }
@@ -101,13 +102,14 @@ const listingsSlice = createSlice({
       })
       .addCase(fetchListingsAsync.fulfilled, (state, action) => {
         state.loading = false
-        state.items = action.payload.listings || []
-        state.pagination = {
-          page: action.payload.page || 1,
-          limit: action.payload.limit || 20,
-          total: action.payload.total || 0,
+        state.items = action.payload.data || []
+        state.pagination = action.payload.pagination || {
+          page: 1,
+          limit: 20,
+          total: 0,
         }
-        state.hasMore = (action.payload.page * action.payload.limit) < action.payload.total
+        const p = state.pagination
+        state.hasMore = (p.page * p.limit) < p.total
       })
       .addCase(fetchListingsAsync.rejected, (state, action) => {
         state.loading = false
@@ -131,7 +133,7 @@ const listingsSlice = createSlice({
       })
       .addCase(createListingAsync.fulfilled, (state, action) => {
         state.loading = false
-        state.items.unshift(action.payload)
+        if (action.payload) state.items.unshift(action.payload)
       })
       .addCase(createListingAsync.rejected, (state, action) => {
         state.loading = false
@@ -143,11 +145,13 @@ const listingsSlice = createSlice({
       })
       .addCase(updateListingAsync.fulfilled, (state, action) => {
         state.loading = false
-        const index = state.items.findIndex(item => item._id === action.payload._id)
+        const id = action.payload?.id || action.payload?._id
+        const index = state.items.findIndex(item => (item.id || item._id) === id)
         if (index !== -1) {
           state.items[index] = action.payload
         }
-        if (state.selectedListing?._id === action.payload._id) {
+        const selId = state.selectedListing?.id || state.selectedListing?._id
+        if (selId === id) {
           state.selectedListing = action.payload
         }
       })
@@ -161,7 +165,7 @@ const listingsSlice = createSlice({
       })
       .addCase(deleteListingAsync.fulfilled, (state, action) => {
         state.loading = false
-        state.items = state.items.filter(item => item._id !== action.payload)
+        state.items = state.items.filter(item => (item.id || item._id) !== action.payload)
       })
       .addCase(deleteListingAsync.rejected, (state, action) => {
         state.loading = false
@@ -173,7 +177,7 @@ const listingsSlice = createSlice({
       })
       .addCase(fetchMyListingsAsync.fulfilled, (state, action) => {
         state.loading = false
-        state.items = action.payload.listings || []
+        state.items = action.payload.data || []
         state.pagination = action.payload.pagination || initialState.pagination
       })
       .addCase(fetchMyListingsAsync.rejected, (state, action) => {

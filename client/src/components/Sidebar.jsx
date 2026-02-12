@@ -8,12 +8,12 @@ const Sidebar = () => {
   const location = useLocation()
   const dispatch = useDispatch()
   const sidebarOpen = useSelector(state => state.ui.sidebarOpen)
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
 
   const dashboardLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: FiHome },
-    { name: 'My Listings', path: '/dashboard/listings', icon: FiList },
-    { name: 'My Bids', path: '/dashboard/bids', icon: FiBook },
+    { name: 'My Listings', path: '/dashboard/listings', icon: FiList, roles: ['seller', 'admin'] },
+    { name: 'My Bids', path: '/dashboard/bids', icon: FiBook, roles: ['buyer', 'seller', 'admin'] },
     { name: 'Watchlist', path: '/dashboard/watchlist', icon: FiHeart },
     { name: 'Messages', path: '/dashboard/messages', icon: FiMessageSquare },
     { name: 'Profile', path: '/dashboard/profile', icon: FiUser },
@@ -51,7 +51,7 @@ const Sidebar = () => {
 
         {/* Navigation */}
         <nav className="p-6 space-y-2">
-          {dashboardLinks.map(link => {
+          {dashboardLinks.filter(link => !link.roles || (user && link.roles.includes(user.role))).map(link => {
             const Icon = link.icon
             return (
               <Link

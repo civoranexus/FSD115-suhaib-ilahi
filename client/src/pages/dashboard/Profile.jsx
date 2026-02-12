@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 import { FiUpload } from 'react-icons/fi'
 
 const Profile = () => {
-  const { user } = useAuth()
+  const { user, updateProfile } = useAuth()
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
@@ -36,8 +36,12 @@ const Profile = () => {
     setLoading(true)
 
     try {
-      // API call to update profile
-      toast.success('Profile updated successfully!')
+      const result = await updateProfile(formData)
+      if (!result.error) {
+        toast.success('Profile updated successfully!')
+      } else {
+        toast.error(result.payload || 'Failed to update profile')
+      }
     } catch (error) {
       toast.error('Failed to update profile')
     } finally {

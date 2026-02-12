@@ -11,7 +11,7 @@ const AdminSidebar = () => {
   const { logout } = useAuth()
 
   const adminLinks = [
-    { name: 'Dashboard', path: '/admin', icon: FiBarChart3 },
+    { name: 'Dashboard', path: '/admin', icon: FiBarChart2 },
     { name: 'Users', path: '/admin/users', icon: FiUsers },
     { name: 'Listings', path: '/admin/listings', icon: FiList },
     { name: 'Reports', path: '/admin/reports', icon: FiAlertCircle },

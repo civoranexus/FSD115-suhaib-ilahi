@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect } from 'react'
-import { loginAsync, registerAsync, logoutAsync, getUserAsync } from '../redux/slices/authSlice'
+import { loginAsync, registerAsync, logoutAsync, getUserAsync, updateProfileAsync } from '../redux/slices/authSlice'
 
 export const useAuth = () => {
   const dispatch = useDispatch()
@@ -25,6 +25,10 @@ export const useAuth = () => {
     return dispatch(logoutAsync())
   }
 
+  const updateProfile = (userData) => {
+    return dispatch(updateProfileAsync(userData))
+  }
+
   return {
     user: auth.user,
     token: auth.token,
@@ -35,5 +39,6 @@ export const useAuth = () => {
     login,
     register,
     logout,
+    updateProfile,
   }
 }

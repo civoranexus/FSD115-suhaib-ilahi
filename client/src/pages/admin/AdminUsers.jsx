@@ -3,7 +3,7 @@ import Card from '../../components/Card'
 import Button from '../../components/Button'
 import Badge from '../../components/Badge'
 import Input from '../../components/Input'
-import { FiEdit2, FiTrash2, FiBold } from 'react-icons/fi'
+import { FiEdit2, FiTrash2, FiSlash } from 'react-icons/fi'
 
 const AdminUsers = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -45,7 +45,7 @@ const AdminUsers = () => {
                   <FiEdit2 className="w-4 h-4" />
                 </Button>
                 <Button variant="warning" size="sm">
-                  <FiBlock className="w-4 h-4" />
+                  <FiSlash className="w-4 h-4" />
                 </Button>
                 <Button variant="danger" size="sm">
                   <FiTrash2 className="w-4 h-4" />

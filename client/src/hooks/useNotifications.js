@@ -2,16 +2,21 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useEffect } from 'react'
 import {
   addNotification,
-  markAsRead,
-  markAllAsRead,
-  removeNotification,
-  clearAllNotifications,
+  fetchNotifications,
+  markAsReadAsync,
+  markAllAsReadAsync,
+  deleteNotificationAsync,
+  clearAllNotificationsAsync,
 } from '../redux/slices/notificationsSlice'
 import { getSocket, socketOn, socketOff, socketEvents } from '../services/socket'
 
 export const useNotifications = () => {
   const dispatch = useDispatch()
   const notifications = useSelector(state => state.notifications)
+
+  useEffect(() => {
+    dispatch(fetchNotifications())
+  }, [dispatch])
 
   useEffect(() => {
     const socket = getSocket()
@@ -34,9 +39,11 @@ export const useNotifications = () => {
   return {
     items: notifications.items,
     unreadCount: notifications.unreadCount,
-    markAsRead: (id) => dispatch(markAsRead(id)),
-    markAllAsRead: () => dispatch(markAllAsRead()),
-    removeNotification: (id) => dispatch(removeNotification(id)),
-    clearAllNotifications: () => dispatch(clearAllNotifications()),
+    markAsRead: (id) => dispatch(markAsReadAsync(id)),
+    markAllAsRead: () => dispatch(markAllAsReadAsync()),
+    removeNotification: (id) => dispatch(deleteNotificationAsync(id)),
+    clearAllNotifications: () => dispatch(clearAllNotificationsAsync()),
+    loading: notifications.loading,
+    error: notifications.error,
   }
 }

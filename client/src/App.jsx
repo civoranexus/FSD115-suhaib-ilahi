@@ -31,6 +31,7 @@ import Watchlist from './pages/dashboard/Watchlist'
 import Messages from './pages/dashboard/Messages'
 import Profile from './pages/dashboard/Profile'
 import Payments from './pages/dashboard/Payments'
+import CreateListing from './pages/dashboard/CreateListing'
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -77,6 +78,8 @@ function App() {
             <Route path="/dashboard/messages" element={<Messages />} />
             <Route path="/dashboard/profile" element={<Profile />} />
             <Route path="/dashboard/payments" element={<Payments />} />
+            <Route path="/dashboard/create-listing" element={<CreateListing />} />
+            <Route path="/dashboard/edit-listing/:id" element={<CreateListing />} />
           </Route>
 
           {/* Admin Routes - Private & Admin Only */}

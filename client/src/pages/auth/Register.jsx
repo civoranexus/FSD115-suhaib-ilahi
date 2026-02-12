@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux'
 import { registerAsync } from '../../redux/slices/authSlice'
 import { validateForm, registerSchema } from '../../utils/validators'
 import Input from '../../components/Input'
+import Select from '../../components/Select'
 import Button from '../../components/Button'
 import Alert from '../../components/Alert'
 import toast from 'react-hot-toast'
@@ -17,6 +18,8 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    phoneNumber: '',
+    role: 'buyer',
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
@@ -45,14 +48,18 @@ const Register = () => {
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        phoneNumber: formData.phoneNumber,
+        role: formData.role,
       }))
 
-      if (!result.payload?.error) {
-        toast.success('Registration successful! Please verify your email.')
-        navigate('/auth/login')
+      if (result.type === 'auth/register/fulfilled') {
+        toast.success('Registration successful! Welcome to LiveStockHub.')
+        navigate('/dashboard')
       } else {
-        setError(result.payload)
-        toast.error(result.payload)
+        const errMsg = result.payload || 'Registration failed'
+        setError(errMsg)
+        toast.error(errMsg)
       }
     } catch (err) {
       setError('Registration failed')
@@ -65,7 +72,7 @@ const Register = () => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
-      <p className="text-gray-600 mb-6">Join our auction platform</p>
+      <p className="text-gray-600 mb-6">Join LiveStockHub marketplace</p>
 
       {error && <Alert type="error" message={error} className="mb-6" />}
 
@@ -103,10 +110,21 @@ const Register = () => {
         />
 
         <Input
+          name="phoneNumber"
+          type="tel"
+          label="Phone Number"
+          placeholder="+919999999999"
+          value={formData.phoneNumber}
+          onChange={handleChange}
+          error={errors.phoneNumber}
+          required
+        />
+
+        <Input
           name="password"
           type="password"
           label="Password"
-          placeholder="Minimum 8 characters"
+          placeholder="Min 8 chars, uppercase, number"
           value={formData.password}
           onChange={handleChange}
           error={errors.password}
@@ -123,6 +141,19 @@ const Register = () => {
           error={errors.confirmPassword}
           required
         />
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="buyer">Buyer</option>
+            <option value="seller">Seller</option>
+          </select>
+        </div>
 
         <label className="flex items-center gap-2">
           <input type="checkbox" className="w-4 h-4 rounded border-gray-300" required />

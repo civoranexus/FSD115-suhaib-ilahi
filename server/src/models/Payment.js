@@ -7,40 +7,41 @@ class Payment {
     const { transactionId, amount, paymentMethod, status, referenceNumber } =
       paymentData;
 
-    const result = await sql`
-      INSERT INTO payments (
+    const result = await sql.query(
+      `INSERT INTO payments (
         transaction_id, amount, payment_method, status, reference_number
-      ) VALUES (
-        ${transactionId}, ${amount}, ${paymentMethod}, ${status}, ${referenceNumber}
-      )
-      RETURNING *
-    `;
+      ) VALUES ($1, $2, $3, $4, $5)
+      RETURNING *`,
+      [transactionId, amount, paymentMethod, status, referenceNumber],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async findById(id) {
     const sql = getDatabase();
 
-    const result = await sql`
-      SELECT p.*, t.buyer_id, t.seller_id, t.listing_id
+    const result = await sql.query(
+      `SELECT p.*, t.buyer_id, t.seller_id, t.listing_id
       FROM payments p
       LEFT JOIN transactions t ON p.transaction_id = t.id
-      WHERE p.id = ${id}
-    `;
+      WHERE p.id = $1`,
+      [id],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async findByTransactionId(transactionId) {
     const sql = getDatabase();
 
-    const result = await sql`
-      SELECT * FROM payments WHERE transaction_id = ${transactionId}
-      ORDER BY created_at DESC
-    `;
+    const result = await sql.query(
+      `SELECT * FROM payments WHERE transaction_id = $1
+      ORDER BY created_at DESC`,
+      [transactionId],
+    );
 
-    return result;
+    return result.rows;
   }
 
   static async update(id, updateData) {
@@ -48,16 +49,17 @@ class Payment {
 
     const { status, metadata } = updateData;
 
-    const result = await sql`
-      UPDATE payments
-      SET status = COALESCE(${status}, status),
-          metadata = COALESCE(${JSON.stringify(metadata)}, metadata),
+    const result = await sql.query(
+      `UPDATE payments
+      SET status = COALESCE($2, status),
+          metadata = COALESCE($3, metadata),
           updated_at = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `;
+      WHERE id = $1
+      RETURNING *`,
+      [id, status, JSON.stringify(metadata)],
+    );
 
-    return result[0];
+    return result.rows[0];
   }
 
   static async getByBuyerId(buyerId, pagination = {}) {
@@ -65,25 +67,27 @@ class Payment {
 
     const { limit = 10, offset = 0 } = pagination;
 
-    const result = await sql`
-      SELECT p.*, t.listing_id, l.title as listing_title
+    const result = await sql.query(
+      `SELECT p.*, t.listing_id, l.title as listing_title
       FROM payments p
       LEFT JOIN transactions t ON p.transaction_id = t.id
       LEFT JOIN livestock_listings l ON t.listing_id = l.id
-      WHERE t.buyer_id = ${buyerId}
+      WHERE t.buyer_id = $1
       ORDER BY p.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+      LIMIT $2 OFFSET $3`,
+      [buyerId, limit, offset],
+    );
 
-    const countResult = await sql`
-      SELECT COUNT(*) FROM payments p
+    const countResult = await sql.query(
+      `SELECT COUNT(*) as count FROM payments p
       LEFT JOIN transactions t ON p.transaction_id = t.id
-      WHERE t.buyer_id = ${buyerId}
-    `;
+      WHERE t.buyer_id = $1`,
+      [buyerId],
+    );
 
     return {
-      data: result,
-      total: parseInt(countResult[0].count),
+      data: result.rows,
+      total: parseInt(countResult.rows[0].count),
     };
   }
 
@@ -92,25 +96,27 @@ class Payment {
 
     const { limit = 10, offset = 0 } = pagination;
 
-    const result = await sql`
-      SELECT p.*, t.buyer_id, l.title as listing_title
+    const result = await sql.query(
+      `SELECT p.*, t.buyer_id, l.title as listing_title
       FROM payments p
       LEFT JOIN transactions t ON p.transaction_id = t.id
       LEFT JOIN livestock_listings l ON t.listing_id = l.id
-      WHERE t.seller_id = ${sellerId}
+      WHERE t.seller_id = $1
       ORDER BY p.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+      LIMIT $2 OFFSET $3`,
+      [sellerId, limit, offset],
+    );
 
-    const countResult = await sql`
-      SELECT COUNT(*) FROM payments p
+    const countResult = await sql.query(
+      `SELECT COUNT(*) as count FROM payments p
       LEFT JOIN transactions t ON p.transaction_id = t.id
-      WHERE t.seller_id = ${sellerId}
-    `;
+      WHERE t.seller_id = $1`,
+      [sellerId],
+    );
 
     return {
-      data: result,
-      total: parseInt(countResult[0].count),
+      data: result.rows,
+      total: parseInt(countResult.rows[0].count),
     };
   }
 }

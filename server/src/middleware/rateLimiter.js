@@ -16,8 +16,8 @@ const createRateLimiter = (options = {}) => {
 };
 
 const authLimiter = createRateLimiter({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
+  windowMs: 15 * 60 * 10000,
+  max: 50,
 });
 
 const apiLimiter = createRateLimiter({

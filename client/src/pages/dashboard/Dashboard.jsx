@@ -4,7 +4,7 @@ import { useListings } from '../../hooks/useListings'
 import { useBids } from '../../hooks/useBids'
 import { formatCurrency } from '../../utils/formatters'
 import Card from '../../components/Card'
-import { FiTrendingUp, FiShoppingCart, FiBook, FiHeart } from 'react-icons/fi'
+import { FiTrendingUp, FiShoppingCart, FiBook, FiHeart, FiDollarSign } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 
 const Dashboard = () => {
@@ -24,7 +24,7 @@ const Dashboard = () => {
       color: 'text-blue-600',
     },
     {
-      icon: <FiBid className="w-6 h-6" />,
+      icon: <FiDollarSign className="w-6 h-6" />,
       title: 'Active Bids',
       value: '8',
       color: 'text-green-600',

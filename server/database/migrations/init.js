@@ -1,12 +1,23 @@
-import { getDatabase } from '../../src/config/database';
-import { info, error as _error } from '../../src/utils/logger';
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const envPath = join(__dirname, "../../.env");
+dotenv.config({ path: envPath });
+
+import { connectDatabase, getDatabase } from "../../src/config/database.js";
+import logger from "../../src/utils/logger.js";
 
 const initDatabase = async () => {
   try {
-    const sql = getDatabase();
+    // Connect to database first
+    await connectDatabase();
+    const pool = getDatabase();
 
     // Create users table
-    await sql`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         first_name VARCHAR(50) NOT NULL,
@@ -30,10 +41,10 @@ const initDatabase = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create livestock_listings table
-    await sql`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS livestock_listings (
         id SERIAL PRIMARY KEY,
         seller_id INTEGER NOT NULL REFERENCES users(id),
@@ -58,10 +69,10 @@ const initDatabase = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create bids table
-    await sql`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS bids (
         id SERIAL PRIMARY KEY,
         listing_id INTEGER NOT NULL REFERENCES livestock_listings(id),
@@ -73,10 +84,10 @@ const initDatabase = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create transactions table
-    await sql`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS transactions (
         id SERIAL PRIMARY KEY,
         bid_id INTEGER NOT NULL REFERENCES bids(id),
@@ -92,10 +103,10 @@ const initDatabase = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create payments table
-    await sql`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS payments (
         id SERIAL PRIMARY KEY,
         transaction_id INTEGER NOT NULL REFERENCES transactions(id),
@@ -107,10 +118,10 @@ const initDatabase = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create messages table
-    await sql`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS messages (
         id SERIAL PRIMARY KEY,
         sender_id INTEGER NOT NULL REFERENCES users(id),
@@ -121,10 +132,10 @@ const initDatabase = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create notifications table
-    await sql`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS notifications (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL REFERENCES users(id),
@@ -137,27 +148,39 @@ const initDatabase = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create indexes
-    await sql`CREATE INDEX idx_listings_seller_id ON livestock_listings(seller_id)`;
-    await sql`CREATE INDEX idx_bids_listing_id ON bids(listing_id)`;
-    await sql`CREATE INDEX idx_bids_buyer_id ON bids(buyer_id)`;
-    await sql`CREATE INDEX idx_transactions_buyer_id ON transactions(buyer_id)`;
-    await sql`CREATE INDEX idx_transactions_seller_id ON transactions(seller_id)`;
-    await sql`CREATE INDEX idx_messages_sender_id ON messages(sender_id)`;
-    await sql`CREATE INDEX idx_messages_recipient_id ON messages(recipient_id)`;
-    await sql`CREATE INDEX idx_notifications_user_id ON notifications(user_id)`;
-    await sql`CREATE INDEX idx_users_email ON users(email)`;
+    await pool.query(
+      `CREATE INDEX idx_listings_seller_id ON livestock_listings(seller_id)`,
+    );
+    await pool.query(`CREATE INDEX idx_bids_listing_id ON bids(listing_id)`);
+    await pool.query(`CREATE INDEX idx_bids_buyer_id ON bids(buyer_id)`);
+    await pool.query(
+      `CREATE INDEX idx_transactions_buyer_id ON transactions(buyer_id)`,
+    );
+    await pool.query(
+      `CREATE INDEX idx_transactions_seller_id ON transactions(seller_id)`,
+    );
+    await pool.query(
+      `CREATE INDEX idx_messages_sender_id ON messages(sender_id)`,
+    );
+    await pool.query(
+      `CREATE INDEX idx_messages_recipient_id ON messages(recipient_id)`,
+    );
+    await pool.query(
+      `CREATE INDEX idx_notifications_user_id ON notifications(user_id)`,
+    );
+    await pool.query(`CREATE INDEX idx_users_email ON users(email)`);
 
-    info('Database tables created successfully');
+    logger.info("Database tables created successfully");
   } catch (error) {
-    _error('Database initialization error:', error);
+    logger.error("Database initialization error:", error);
     throw error;
   }
 };
 
-initDatabase().catch(error => {
-  _error('Failed to initialize database:', error);
+initDatabase().catch((error) => {
+  logger.error("Failed to initialize database:", error);
   process.exit(1);
 });

@@ -54,7 +54,7 @@ const searchSlice = createSlice({
       })
       .addCase(searchListingsAsync.fulfilled, (state, action) => {
         state.loading = false
-        state.results = action.payload.results || []
+        state.results = action.payload.data || []
       })
       .addCase(searchListingsAsync.rejected, (state, action) => {
         state.loading = false

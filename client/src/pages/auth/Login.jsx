@@ -18,6 +18,16 @@ const Login = () => {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
+  const handleQuickLogin = (role) => {
+    const credentials = {
+      buyer: { email: 'john@example.com', password: 'password123' },
+      seller: { email: 'seller@livestockhub.com', password: 'password123' },
+      admin: { email: 'admin@livestockhub.com', password: 'password123' }
+    }
+
+    setFormData(credentials[role])
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setErrors({})
@@ -30,11 +40,17 @@ const Login = () => {
 
     try {
       const result = await login(formData.email, formData.password)
-      if (!result.payload?.error) {
-        toast.success('Login successful!')
-        navigate('/dashboard')
+      if (result.type === 'auth/login/fulfilled') {
+        const user = result.payload.user || result.payload.data.user;
+        toast.success(`Welcome back, ${user.firstName}!`)
+
+        if (user.role === 'admin') {
+          navigate('/admin')
+        } else {
+          navigate('/dashboard')
+        }
       } else {
-        toast.error(result.payload.error)
+        toast.error(result.payload || 'Login failed')
       }
     } catch (err) {
       toast.error('Login failed')
@@ -90,6 +106,34 @@ const Login = () => {
           Login
         </Button>
       </form>
+
+      {/* Quick Login Options for Demo */}
+      <div className="mt-8 border-t pt-6">
+        <p className="text-sm text-gray-500 mb-3 text-center">Quick Login (Demo Mode)</p>
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => handleQuickLogin('buyer')}
+            className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded hover:bg-blue-200 transition-colors"
+          >
+            Buyer
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickLogin('seller')}
+            className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded hover:bg-green-200 transition-colors"
+          >
+            Seller
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickLogin('admin')}
+            className="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded hover:bg-purple-200 transition-colors"
+          >
+            Admin
+          </button>
+        </div>
+      </div>
 
       <p className="text-center text-gray-600 mt-6">
         Don't have an account?{' '}

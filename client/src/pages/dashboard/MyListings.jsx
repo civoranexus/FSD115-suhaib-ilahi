@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom'
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi'
 
 const MyListings = () => {
-  const { items, loading, fetchMyListings, deleteListings } = useListings()
+  const { items, loading, fetchMyListings, deleteListing } = useListings()
   const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
@@ -59,10 +59,12 @@ const MyListings = () => {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="secondary" size="sm">
-                      <FiEdit2 className="w-4 h-4" />
-                    </Button>
-                    <Button variant="danger" size="sm">
+                    <Link to={`/dashboard/edit-listing/${listing._id || listing.id}`}>
+                      <Button variant="secondary" size="sm">
+                        <FiEdit2 className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                    <Button variant="danger" size="sm" onClick={() => deleteListing(listing._id || listing.id)}>
                       <FiTrash2 className="w-4 h-4" />
                     </Button>
                   </div>

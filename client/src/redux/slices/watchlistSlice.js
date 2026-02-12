@@ -25,7 +25,7 @@ export const addToWatchlistAsync = createAsyncThunk(
   async (listingId, { rejectWithValue }) => {
     try {
       const response = await watchlistService.addToWatchlist(listingId)
-      return response.data
+      return response.data.data
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to add to watchlist')
     }
@@ -60,8 +60,8 @@ const watchlistSlice = createSlice({
       })
       .addCase(fetchWatchlistAsync.fulfilled, (state, action) => {
         state.loading = false
-        state.items = action.payload.items || []
-        state.total = action.payload.total || 0
+        state.items = action.payload.data || []
+        state.total = action.payload.data?.length || 0
       })
       .addCase(fetchWatchlistAsync.rejected, (state, action) => {
         state.loading = false
@@ -71,7 +71,8 @@ const watchlistSlice = createSlice({
         state.error = null
       })
       .addCase(addToWatchlistAsync.fulfilled, (state, action) => {
-        if (!state.items.find(item => item._id === action.payload._id)) {
+        const id = action.payload?.id || action.payload?._id
+        if (action.payload && !state.items.find(item => (item.id || item._id) === id)) {
           state.items.push(action.payload)
           state.total += 1
         }
@@ -80,7 +81,7 @@ const watchlistSlice = createSlice({
         state.error = action.payload
       })
       .addCase(removeFromWatchlistAsync.fulfilled, (state, action) => {
-        state.items = state.items.filter(item => item._id !== action.payload)
+        state.items = state.items.filter(item => (item.id || item._id) !== action.payload)
         state.total = Math.max(0, state.total - 1)
       })
       .addCase(removeFromWatchlistAsync.rejected, (state, action) => {
