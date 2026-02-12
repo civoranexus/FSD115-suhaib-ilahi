@@ -1,0 +1,8 @@
+﻿[31mΓ£ù[39m Build failed in 6.98s
+[31merror during build:
+[31m[vite:terser] terser not found. Since Vite v3, terser has become an optional dependency. You need to install it.[31m
+    at loadTerserPath (file:///D:/GitHub_Clones/Civora/client/node_modules/vite/dist/node/chunks/config.js:32974:8)
+    at Object.renderChunk (file:///D:/GitHub_Clones/Civora/client/node_modules/vite/dist/node/chunks/config.js:33003:39)
+    at Object.handler (file:///D:/GitHub_Clones/Civora/client/node_modules/vite/dist/node/chunks/config.js:33743:13)
+    at file:///D:/GitHub_Clones/Civora/client/node_modules/rollup/dist/es/shared/node-entry.js:22548:40
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
